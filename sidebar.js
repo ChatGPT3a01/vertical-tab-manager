@@ -37,6 +37,7 @@ const pinnedTabsSection = document.getElementById('pinnedTabs');
 const helpBtn = document.getElementById('helpBtn');
 const helpPanel = document.getElementById('helpPanel');
 const closeHelpBtn = document.getElementById('closeHelpBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
 
 // 初始化
 async function init() {
@@ -51,6 +52,7 @@ async function init() {
   setupSettingsListeners();
   setupShortcutListeners();
   setupHelpListeners();
+  setupFullscreenListeners();
 }
 
 // 載入所有分頁
@@ -413,6 +415,68 @@ function setupHelpListeners() {
       helpPanel.classList.remove('visible');
     }
   });
+}
+
+// ===== 全螢幕功能 =====
+
+let isFullscreen = false;
+
+// 切換全螢幕
+async function toggleFullscreen() {
+  try {
+    const window = await chrome.windows.getCurrent();
+
+    if (window.state === 'fullscreen') {
+      // 退出全螢幕
+      await chrome.windows.update(window.id, { state: 'maximized' });
+      isFullscreen = false;
+    } else {
+      // 進入全螢幕
+      await chrome.windows.update(window.id, { state: 'fullscreen' });
+      isFullscreen = true;
+    }
+
+    updateFullscreenIcon();
+  } catch (e) {
+    console.error('切換全螢幕失敗:', e);
+  }
+}
+
+// 更新全螢幕圖示
+function updateFullscreenIcon() {
+  const icon = document.getElementById('fullscreenIcon');
+  if (icon) {
+    if (isFullscreen) {
+      // 退出全螢幕圖示
+      icon.innerHTML = '<path d="M4 4H2v2h2V4zm10 0h-2v2h2V4zM4 10H2v2h2v-2zm10 0h-2v2h2v-2zM6 2H4v2h2V2zm0 10H4v2h2v-2zm8-10h-2v2h2V2zm0 10h-2v2h2v-2z"/>';
+    } else {
+      // 進入全螢幕圖示
+      icon.innerHTML = '<path d="M2 2h4v2H4v2H2V2zm8 0h4v4h-2V4h-2V2zM4 10H2v4h4v-2H4v-2zm8 2v2h4v-4h-2v2h-2z"/>';
+    }
+  }
+}
+
+// 檢查當前全螢幕狀態
+async function checkFullscreenState() {
+  try {
+    const window = await chrome.windows.getCurrent();
+    isFullscreen = window.state === 'fullscreen';
+    updateFullscreenIcon();
+  } catch (e) {
+    console.error('檢查全螢幕狀態失敗:', e);
+  }
+}
+
+// 設定全螢幕事件監聽
+function setupFullscreenListeners() {
+  // 點擊全螢幕按鈕
+  fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+  // 初始化時檢查狀態
+  checkFullscreenState();
+
+  // 監聽視窗狀態變化（當使用者按 F11 時）
+  chrome.windows.onBoundsChanged?.addListener?.(checkFullscreenState);
 }
 
 // ===== 設定功能 =====

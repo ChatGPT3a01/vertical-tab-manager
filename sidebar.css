@@ -440,12 +440,14 @@ body {
 
 /* 設定按鈕 */
 .settings-btn,
+.fullscreen-btn,
 .help-btn {
   background-color: transparent;
   color: var(--text-secondary);
 }
 
-.settings-btn:hover {
+.settings-btn:hover,
+.fullscreen-btn:hover {
   background-color: var(--bg-hover);
   color: var(--text-primary);
 }
