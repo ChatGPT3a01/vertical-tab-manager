@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>麥克風權限</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eaeaea;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      max-width: 400px;
+    }
+    h1 { font-size: 24px; margin-bottom: 16px; }
+    p { color: #a0a0a0; margin-bottom: 24px; line-height: 1.6; }
+    .btn {
+      padding: 14px 32px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #e94560;
+      color: white;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .status {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+    }
+    .status.success { background: #22c55e33; color: #22c55e; display: block; }
+    .status.error { background: #ef444433; color: #ef4444; display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎤 麥克風權限</h1>
+    <p>語音輸入需要麥克風權限。<br>點擊下方按鈕並在彈出視窗中選擇「允許」。</p>
+    <button id="requestBtn" class="btn btn-primary">授權麥克風</button>
+    <div id="status" class="status"></div>
+  </div>
+  <script>
+    const btn = document.getElementById('requestBtn');
+    const status = document.getElementById('status');
+
+    btn.addEventListener('click', async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        status.className = 'status success';
+        status.textContent = '✅ 權限已授予！可以關閉此頁面，回到側邊欄使用語音輸入。';
+        btn.textContent = '已授權 ✓';
+        btn.disabled = true;
+      } catch (err) {
+        status.className = 'status error';
+        if (err.name === 'NotAllowedError') {
+          status.textContent = '❌ 權限被拒絕。請點擊網址列的 🔒 圖示開啟權限。';
+        } else {
+          status.textContent = '❌ ' + err.message;
+        }
+      }
+    });
+
+    // 檢查現有權限
+    navigator.permissions.query({ name: 'microphone' }).then(result => {
+      if (result.state === 'granted') {
+        status.className = 'status success';
+        status.textContent = '✅ 麥克風權限已授予！可以關閉此頁面。';
+        btn.textContent = '已授權 ✓';
+        btn.disabled = true;
+      }
+    }).catch(() => {});
+  </script>
+</body>
+</html>

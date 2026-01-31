@@ -936,14 +936,53 @@ function setupAiListeners() {
 
 // 設定語音識別
 function setupSpeechRecognition() {
-  // Chrome 擴充功能側邊欄不支援語音識別，隱藏按鈕
-  if (voiceInputBtn) {
-    voiceInputBtn.style.display = 'none';
+  if (!('webkitSpeechRecognition' in window)) {
+    console.log('此瀏覽器不支援語音識別');
+    if (voiceInputBtn) voiceInputBtn.style.display = 'none';
+    return;
   }
-  const langSelect = document.querySelector('.ai-lang-select');
-  if (langSelect) {
-    langSelect.style.display = 'none';
-  }
+
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    voiceInputBtn.classList.add('recording');
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    voiceInputBtn.classList.remove('recording');
+  };
+
+  recognition.onresult = (event) => {
+    let finalTranscript = '';
+    let interimTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript;
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+
+    aiInput.value = finalTranscript || interimTranscript;
+  };
+
+  recognition.onerror = (event) => {
+    console.error('語音識別錯誤:', event.error);
+    isRecording = false;
+    voiceInputBtn.classList.remove('recording');
+
+    if (event.error === 'not-allowed') {
+      showAiMessage('❌ 需要麥克風權限，正在開啟授權頁面...', true);
+      // 開啟權限請求頁面
+      chrome.tabs.create({ url: chrome.runtime.getURL('request-mic.html') });
+    }
+  };
 }
 
 // 切換語音輸入
@@ -965,7 +1004,8 @@ async function toggleVoiceInput() {
     } catch (error) {
       console.error('麥克風權限錯誤:', error);
       if (error.name === 'NotAllowedError') {
-        showAiMessage('❌ 麥克風權限被拒絕\n\n請點擊網址列左側的 🔒 圖示 → 網站設定 → 麥克風 → 允許', true);
+        showAiMessage('❌ 需要麥克風權限，正在開啟授權頁面...', true);
+        chrome.tabs.create({ url: chrome.runtime.getURL('request-mic.html') });
       } else if (error.name === 'NotFoundError') {
         showAiMessage('❌ 找不到麥克風裝置', true);
       } else {
