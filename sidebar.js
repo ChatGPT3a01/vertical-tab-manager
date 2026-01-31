@@ -8,17 +8,17 @@ let shortcuts = [];
 let settings = {
   theme: 'blue',
   aiProvider: 'google',
-  aiModel: 'gemini-3-flash',
+  aiModel: 'gemini-2.5-flash',
   aiApiKey: ''
 };
 
 // AI 模型選項
 const aiModels = {
   google: [
-    { id: 'gemini-3-flash', name: 'Gemini 3 Flash (快速)' },
-    { id: 'gemini-3-pro', name: 'Gemini 3 Pro (最強)' },
-    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' }
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (推薦)' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
+    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (預覽)' },
+    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro (預覽)' }
   ],
   openai: [
     { id: 'gpt-5.2', name: 'GPT-5.2 (最新)' },
@@ -1002,7 +1002,7 @@ async function toggleVoiceInput() {
     } catch (error) {
       console.error('麥克風權限錯誤:', error);
       if (error.name === 'NotAllowedError') {
-        showAiMessage('❌ 麥克風權限被拒絕，請在瀏覽器設定中允許', true);
+        showAiMessage('❌ 麥克風權限被拒絕\n\n請點擊網址列左側的 🔒 圖示 → 網站設定 → 麥克風 → 允許', true);
       } else if (error.name === 'NotFoundError') {
         showAiMessage('❌ 找不到麥克風裝置', true);
       } else {
