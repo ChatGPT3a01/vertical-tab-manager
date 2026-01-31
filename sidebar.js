@@ -280,6 +280,10 @@ async function handleContextMenuAction(action) {
       await chrome.tabs.duplicate(contextMenuTabId);
       break;
 
+    case 'copyUrl':
+      await navigator.clipboard.writeText(tab.url);
+      break;
+
     case 'pin':
       await chrome.tabs.update(contextMenuTabId, { pinned: !tab.pinned });
       break;
