@@ -911,19 +911,19 @@ function setupAiListeners() {
     });
   });
 
-  // 發送按鈕
+  // 發送按鈕（自訂問題不需要頁面內容）
   if (sendAiBtn) {
     sendAiBtn.addEventListener('click', () => {
-      sendAiQuery(aiInput.value);
+      sendAiQuery(aiInput.value, false);
     });
   }
 
-  // Enter 發送
+  // Enter 發送（自訂問題不需要頁面內容）
   if (aiInput) {
     aiInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        sendAiQuery(aiInput.value);
+        sendAiQuery(aiInput.value, false);
       }
     });
   }
