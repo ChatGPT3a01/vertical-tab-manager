@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>垂直分頁</title>
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+  <div class="container">
+    <!-- 頂部工具列 -->
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="搜尋分頁..." />
+      <button id="newTabBtn" class="icon-btn" title="新增分頁">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" fill="none"/>
+        </svg>
+      </button>
+      <button id="settingsBtn" class="icon-btn settings-btn" title="設定">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 10a2 2 0 100-4 2 2 0 000 4z"/>
+          <path d="M13.5 8c0-.3 0-.5-.1-.8l1.4-1.1c.1-.1.2-.3.1-.4l-1.3-2.3c-.1-.1-.3-.2-.4-.1l-1.7.7c-.4-.3-.8-.5-1.3-.7L10 1.5c0-.2-.2-.3-.4-.3H7.4c-.2 0-.4.1-.4.3l-.2 1.8c-.5.2-.9.4-1.3.7l-1.7-.7c-.2-.1-.3 0-.4.1L2.1 5.7c-.1.1 0 .3.1.4l1.4 1.1c0 .3-.1.5-.1.8s0 .5.1.8L2.2 9.9c-.1.1-.2.3-.1.4l1.3 2.3c.1.1.3.2.4.1l1.7-.7c.4.3.8.5 1.3.7l.2 1.8c0 .2.2.3.4.3h2.2c.2 0 .4-.1.4-.3l.2-1.8c.5-.2.9-.4 1.3-.7l1.7.7c.2.1.3 0 .4-.1l1.3-2.3c.1-.1 0-.3-.1-.4l-1.4-1.1c.1-.3.1-.5.1-.8z"/>
+        </svg>
+      </button>
+      <button id="helpBtn" class="help-btn" title="使用說明">
+        <span class="help-icon">?</span>
+        <span class="help-text-label">說明</span>
+      </button>
+    </div>
+
+    <!-- 教學面板 -->
+    <div id="helpPanel" class="help-panel">
+      <div class="help-header">
+        <span>📖 使用說明</span>
+        <button id="closeHelpBtn" class="close-btn">×</button>
+      </div>
+      <div class="help-content">
+        <div class="help-section">
+          <h3>🖱️ 基本操作</h3>
+          <ul>
+            <li><strong>點擊分頁</strong> → 切換到該分頁</li>
+            <li><strong>點擊 × 按鈕</strong> → 關閉分頁</li>
+            <li><strong>點擊 + 按鈕</strong> → 新增分頁</li>
+            <li><strong>拖曳分頁</strong> → 重新排序</li>
+            <li><strong>右鍵點擊</strong> → 開啟功能選單</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>🔍 搜尋分頁</h3>
+          <ul>
+            <li>在搜尋框輸入關鍵字</li>
+            <li>可搜尋分頁標題或網址</li>
+            <li>按 <kbd>Ctrl+F</kbd> 快速聚焦搜尋框</li>
+            <li>按 <kbd>Esc</kbd> 清除搜尋</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>📌 固定分頁</h3>
+          <ul>
+            <li>右鍵點擊分頁 → 選擇「固定/取消固定」</li>
+            <li>固定的分頁會顯示在最上方</li>
+            <li>固定分頁不會被「關閉其他分頁」關閉</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>📁 分頁群組</h3>
+          <ul>
+            <li>右鍵點擊分頁 → 選擇「建立群組」</li>
+            <li>點擊群組標題可展開/收合</li>
+            <li>右鍵 → 「移出群組」可將分頁移出</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>🎨 主題設定</h3>
+          <ul>
+            <li>點擊 ⚙ 設定按鈕</li>
+            <li>選擇喜歡的主題顏色</li>
+            <li>設定會自動儲存</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>⚡ 快捷網站</h3>
+          <ul>
+            <li>底部「快捷網站」區塊可快速開啟常用網站</li>
+            <li>點擊 + 按鈕新增快捷網站</li>
+            <li>可選擇「加入目前分頁」或手動輸入</li>
+            <li>滑鼠移到快捷網站上，點擊 × 可刪除</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>📍 側邊欄位置</h3>
+          <ul>
+            <li>在 ⚙ 設定中查看詳細說明</li>
+            <li>需到 Chrome 設定 → 外觀 → 側邊欄 更改</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>⌨️ 快捷鍵</h3>
+          <table class="shortcut-table">
+            <tr><td><kbd>Ctrl+F</kbd></td><td>聚焦搜尋框</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>清除搜尋 / 關閉選單</td></tr>
+          </table>
+        </div>
+
+        <div class="help-author">
+          <p>👨‍🏫 作者：阿亮老師</p>
+          <p>
+            <a href="https://www.youtube.com/@Liang-yt02" target="_blank">📺 YouTube</a> |
+            <a href="https://www.facebook.com/groups/2754139931432955" target="_blank">👥 3A科技研究社</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 設定面板 -->
+    <div id="settingsPanel" class="settings-panel">
+      <div class="settings-header">
+        <span>⚙ 設定</span>
+        <button id="closeSettingsBtn" class="close-btn">×</button>
+      </div>
+      <div class="settings-content">
+        <div class="settings-section">
+          <label>主題顏色</label>
+          <div class="theme-options">
+            <button class="theme-btn" data-theme="white" title="白色">
+              <span class="theme-color" style="background: #ffffff; border: 1px solid #ccc;"></span>
+            </button>
+            <button class="theme-btn" data-theme="light-grey" title="淺灰">
+              <span class="theme-color" style="background: #f0f0f0; border: 1px solid #ccc;"></span>
+            </button>
+            <button class="theme-btn" data-theme="blue" title="深藍">
+              <span class="theme-color" style="background: #1a1a2e;"></span>
+            </button>
+            <button class="theme-btn" data-theme="grey" title="深灰">
+              <span class="theme-color" style="background: #1a1a1a;"></span>
+            </button>
+            <button class="theme-btn" data-theme="purple" title="深紫">
+              <span class="theme-color" style="background: #1a1625;"></span>
+            </button>
+            <button class="theme-btn" data-theme="green" title="深綠">
+              <span class="theme-color" style="background: #0f1a14;"></span>
+            </button>
+            <button class="theme-btn" data-theme="dark" title="純黑">
+              <span class="theme-color" style="background: #0a0a0a;"></span>
+            </button>
+          </div>
+        </div>
+        <div class="settings-section">
+          <label>側邊欄位置</label>
+          <div class="position-help">
+            <p class="help-text">側邊欄位置需在瀏覽器設定中更改：</p>
+            <ol class="help-steps">
+              <li>點擊 Chrome 右上角 <strong>⋮</strong> → <strong>設定</strong></li>
+              <li>左側選單點擊 <strong>外觀</strong></li>
+              <li>找到 <strong>側邊欄</strong> 選項</li>
+              <li>選擇「顯示在左側」或「顯示在右側」</li>
+            </ol>
+            <a href="chrome://settings/appearance" id="openSettingsLink" class="help-link">開啟 Chrome 外觀設定</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 固定的分頁 -->
+    <div id="pinnedTabs" class="tab-section">
+      <div class="section-header">
+        <span>📌 固定分頁</span>
+      </div>
+      <div id="pinnedTabList" class="tab-list"></div>
+    </div>
+
+    <!-- 分頁群組 -->
+    <div id="groupedTabs" class="tab-section">
+      <!-- 動態產生的群組會放在這裡 -->
+    </div>
+
+    <!-- 一般分頁 -->
+    <div id="normalTabs" class="tab-section">
+      <div class="section-header">
+        <span>📑 分頁</span>
+        <span id="tabCount" class="tab-count">0</span>
+      </div>
+      <div id="normalTabList" class="tab-list"></div>
+    </div>
+
+    <!-- 快捷網站 -->
+    <div id="shortcutsSection" class="tab-section shortcuts-section">
+      <div class="section-header">
+        <span>⚡ 快捷網站</span>
+        <button id="addShortcutBtn" class="add-shortcut-btn" title="新增快捷網站">+</button>
+      </div>
+      <div id="shortcutsList" class="shortcuts-list">
+        <!-- 動態產生的快捷網站 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增快捷網站對話框 -->
+  <div id="shortcutModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span>新增快捷網站</span>
+        <button id="closeModalBtn" class="close-btn">×</button>
+      </div>
+      <div class="modal-body">
+        <button id="addCurrentTabBtn" class="modal-action-btn">
+          📄 加入目前分頁
+        </button>
+        <div class="modal-divider">
+          <span>或手動輸入</span>
+        </div>
+        <div class="form-group">
+          <label for="shortcutName">名稱</label>
+          <input type="text" id="shortcutName" placeholder="例如：Google" />
+        </div>
+        <div class="form-group">
+          <label for="shortcutUrl">網址</label>
+          <input type="url" id="shortcutUrl" placeholder="https://www.google.com" />
+        </div>
+        <button id="saveShortcutBtn" class="save-btn">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右鍵選單 -->
+  <div id="contextMenu" class="context-menu">
+    <div class="menu-item" data-action="reload">🔄 重新載入</div>
+    <div class="menu-item" data-action="duplicate">📋 複製分頁</div>
+    <div class="menu-item" data-action="pin">📌 固定/取消固定</div>
+    <div class="menu-item" data-action="mute">🔇 靜音/取消靜音</div>
+    <div class="menu-separator"></div>
+    <div class="menu-item" data-action="newGroup">📁 建立群組</div>
+    <div class="menu-item" data-action="removeFromGroup">📤 移出群組</div>
+    <div class="menu-separator"></div>
+    <div class="menu-item" data-action="closeOthers">🗑️ 關閉其他分頁</div>
+    <div class="menu-item" data-action="closeRight">➡️ 關閉右側分頁</div>
+    <div class="menu-item close" data-action="close">❌ 關閉分頁</div>
+  </div>
+
+  <script src="sidebar.js"></script>
+</body>
+</html>

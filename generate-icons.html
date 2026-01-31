@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>生成擴充功能圖示</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #1a1a2e;
+      color: #eaeaea;
+    }
+    h1 { color: #e94560; }
+    .icons { display: flex; gap: 20px; flex-wrap: wrap; margin: 20px 0; }
+    .icon-box {
+      background: #16213e;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    canvas { display: block; margin: 10px auto; }
+    button {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover { opacity: 0.8; }
+    .instructions {
+      background: #16213e;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 30px;
+    }
+    code {
+      background: #0f3460;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>垂直分頁管理器 - 圖示生成器</h1>
+  <p>點擊下方按鈕下載各尺寸的圖示檔案，然後放到 <code>icons</code> 資料夾中</p>
+
+  <div class="icons" id="iconContainer"></div>
+
+  <div class="instructions">
+    <h3>使用說明：</h3>
+    <ol>
+      <li>點擊每個圖示下方的「下載」按鈕</li>
+      <li>將下載的檔案放到 <code>icons</code> 資料夾中</li>
+      <li>確保檔案名稱為 <code>icon16.png</code>、<code>icon32.png</code>、<code>icon48.png</code>、<code>icon128.png</code></li>
+    </ol>
+  </div>
+
+  <script>
+    const sizes = [16, 32, 48, 128];
+
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = size;
+      canvas.height = size;
+
+      // 背景漸層
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#e94560');
+      gradient.addColorStop(1, '#1a1a2e');
+
+      // 圓角矩形
+      const radius = size * 0.18;
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, radius);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // 繪製分頁條
+      ctx.fillStyle = 'white';
+      const barHeight = size * 0.12;
+      const barWidth = size * 0.7;
+      const startX = size * 0.15;
+      const startY = size * 0.18;
+      const gap = size * 0.19;
+
+      for (let i = 0; i < 4; i++) {
+        const width = i === 3 ? barWidth * 0.55 : barWidth;
+        const y = startY + (i * gap);
+        ctx.beginPath();
+        ctx.roundRect(startX, y, width, barHeight, size * 0.03);
+        ctx.fill();
+      }
+    }
+
+    const container = document.getElementById('iconContainer');
+
+    sizes.forEach(size => {
+      const box = document.createElement('div');
+      box.className = 'icon-box';
+
+      const canvas = document.createElement('canvas');
+      drawIcon(canvas, size);
+
+      const label = document.createElement('div');
+      label.textContent = `${size}x${size}`;
+
+      const btn = document.createElement('button');
+      btn.textContent = '下載';
+      btn.onclick = () => {
+        const link = document.createElement('a');
+        link.download = `icon${size}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      };
+
+      box.appendChild(canvas);
+      box.appendChild(label);
+      box.appendChild(btn);
+      container.appendChild(box);
+    });
+  </script>
+</body>
+</html>

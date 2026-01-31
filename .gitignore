@@ -1,0 +1,13 @@
+# 開發用文件
+CLAUDE.md
+INSTALL_GUIDE.md
+.claude/
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
