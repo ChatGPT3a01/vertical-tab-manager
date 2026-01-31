@@ -36,6 +36,11 @@
       color: white;
     }
     .btn-primary:hover { opacity: 0.9; }
+    .btn:disabled {
+      background: #22c55e;
+      cursor: default;
+      opacity: 1;
+    }
     .status {
       margin-top: 20px;
       padding: 12px;
@@ -57,7 +62,9 @@
     const btn = document.getElementById('requestBtn');
     const status = document.getElementById('status');
 
-    btn.addEventListener('click', async () => {
+    // 點擊按鈕請求權限
+    btn.onclick = async function() {
+      btn.textContent = '請求中...';
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(track => track.stop());
@@ -66,24 +73,15 @@
         btn.textContent = '已授權 ✓';
         btn.disabled = true;
       } catch (err) {
+        btn.textContent = '授權麥克風';
         status.className = 'status error';
         if (err.name === 'NotAllowedError') {
-          status.textContent = '❌ 權限被拒絕。請點擊網址列的 🔒 圖示開啟權限。';
+          status.textContent = '❌ 權限被拒絕。請點擊網址列的 🔒 圖示 → 網站設定 → 麥克風 → 允許';
         } else {
           status.textContent = '❌ ' + err.message;
         }
       }
-    });
-
-    // 檢查現有權限
-    navigator.permissions.query({ name: 'microphone' }).then(result => {
-      if (result.state === 'granted') {
-        status.className = 'status success';
-        status.textContent = '✅ 麥克風權限已授予！可以關閉此頁面。';
-        btn.textContent = '已授權 ✓';
-        btn.disabled = true;
-      }
-    }).catch(() => {});
+    };
   </script>
 </body>
 </html>
