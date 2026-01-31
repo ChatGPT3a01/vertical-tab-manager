@@ -37,9 +37,8 @@
     }
     .btn-primary:hover { opacity: 0.9; }
     .btn:disabled {
-      background: #22c55e;
-      cursor: default;
-      opacity: 1;
+      background: #666;
+      cursor: wait;
     }
     .status {
       margin-top: 20px;
@@ -58,30 +57,6 @@
     <button id="requestBtn" class="btn btn-primary">授權麥克風</button>
     <div id="status" class="status"></div>
   </div>
-  <script>
-    const btn = document.getElementById('requestBtn');
-    const status = document.getElementById('status');
-
-    // 點擊按鈕請求權限
-    btn.onclick = async function() {
-      btn.textContent = '請求中...';
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-        status.className = 'status success';
-        status.textContent = '✅ 權限已授予！可以關閉此頁面，回到側邊欄使用語音輸入。';
-        btn.textContent = '已授權 ✓';
-        btn.disabled = true;
-      } catch (err) {
-        btn.textContent = '授權麥克風';
-        status.className = 'status error';
-        if (err.name === 'NotAllowedError') {
-          status.textContent = '❌ 權限被拒絕。請點擊網址列的 🔒 圖示 → 網站設定 → 麥克風 → 允許';
-        } else {
-          status.textContent = '❌ ' + err.message;
-        }
-      }
-    };
-  </script>
+  <script src="request-mic.js"></script>
 </body>
 </html>
