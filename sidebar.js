@@ -1104,6 +1104,10 @@ async function callAI(prompt) {
   const model = settings.aiModel;
   const apiKey = settings.aiApiKey;
 
+  // 加入繁體中文系統提示
+  const systemPrompt = '請一律使用繁體中文回答。';
+  const fullPrompt = systemPrompt + '\n\n' + prompt;
+
   let url, headers, body;
 
   switch (provider) {
@@ -1111,7 +1115,7 @@ async function callAI(prompt) {
       url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
       headers = { 'Content-Type': 'application/json' };
       body = {
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ parts: [{ text: fullPrompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
       };
       break;
@@ -1124,7 +1128,10 @@ async function callAI(prompt) {
       };
       body = {
         model: model,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: '請一律使用繁體中文回答。' },
+          { role: 'user', content: prompt }
+        ],
         temperature: 0.7,
         max_tokens: 2048
       };
@@ -1138,7 +1145,10 @@ async function callAI(prompt) {
       };
       body = {
         model: model,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: '請一律使用繁體中文回答。' },
+          { role: 'user', content: prompt }
+        ],
         temperature: 0.6,
         max_tokens: 2048
       };
