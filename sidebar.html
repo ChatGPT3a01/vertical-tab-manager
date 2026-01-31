@@ -179,6 +179,33 @@
             <a href="chrome://settings/appearance" id="openSettingsLink" class="help-link">開啟 Chrome 外觀設定</a>
           </div>
         </div>
+        <div class="settings-section">
+          <label>🤖 AI 助手設定</label>
+          <div class="ai-settings">
+            <div class="form-group">
+              <label for="aiProvider">AI 服務</label>
+              <select id="aiProvider">
+                <option value="google">Google Gemini</option>
+                <option value="openai">OpenAI</option>
+                <option value="groq">Groq</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="aiModel">模型</label>
+              <select id="aiModel">
+                <!-- 動態填入 -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="aiApiKey">API Key</label>
+              <div class="api-key-input">
+                <input type="password" id="aiApiKey" placeholder="輸入 API Key" />
+                <button id="toggleApiKey" class="toggle-key-btn" title="顯示/隱藏">👁</button>
+              </div>
+            </div>
+            <button id="saveAiSettings" class="save-btn">儲存 AI 設定</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -202,6 +229,43 @@
         <span id="tabCount" class="tab-count">0</span>
       </div>
       <div id="normalTabList" class="tab-list"></div>
+    </div>
+
+    <!-- 可拖曳分隔線 -->
+    <div id="resizeHandle" class="resize-handle" title="拖曳調整大小">
+      <div class="resize-line"></div>
+    </div>
+
+    <!-- AI 助手 -->
+    <div id="aiSection" class="tab-section ai-section">
+      <div class="section-header">
+        <span>🤖 AI 助手</span>
+        <button id="toggleAiSection" class="toggle-section-btn" title="展開/收合">▼</button>
+      </div>
+      <div id="aiContent" class="ai-content">
+        <div class="ai-quick-actions">
+          <button class="ai-action-btn" data-action="summary">📝 摘要</button>
+          <button class="ai-action-btn" data-action="conclusion">💡 結論</button>
+          <button class="ai-action-btn" data-action="translate">🌐 翻譯</button>
+        </div>
+        <div class="ai-input-container">
+          <input type="text" id="aiInput" placeholder="輸入問題..." />
+          <button id="voiceInputBtn" class="voice-btn" title="語音輸入">
+            <span class="mic-icon">🎤</span>
+          </button>
+          <button id="sendAiBtn" class="send-btn" title="發送">➤</button>
+        </div>
+        <div class="ai-lang-select">
+          <label>語音語言：</label>
+          <select id="voiceLang">
+            <option value="zh-TW">中文</option>
+            <option value="en-US">English</option>
+          </select>
+        </div>
+        <div id="aiResponse" class="ai-response">
+          <div class="ai-placeholder">選擇快捷功能或輸入問題來詢問 AI</div>
+        </div>
+      </div>
     </div>
 
     <!-- 快捷網站 -->

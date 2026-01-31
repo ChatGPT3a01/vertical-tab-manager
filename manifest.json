@@ -8,7 +8,12 @@
     "tabs",
     "tabGroups",
     "storage",
-    "favicon"
+    "favicon",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
   ],
   "action": {
     "default_title": "開啟垂直分頁側邊欄",

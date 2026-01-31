@@ -100,6 +100,14 @@ body {
   flex-direction: column;
   height: 100%;
   padding: 4px;
+  overflow: hidden;
+}
+
+/* 分頁區域可捲動 */
+#normalTabs {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 100px;
 }
 
 /* 工具列 */
@@ -974,4 +982,294 @@ kbd {
 
 .help-author a:hover {
   text-decoration: underline;
+}
+
+/* ===== 可拖曳分隔線 ===== */
+
+.resize-handle {
+  height: 12px;
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  transition: background-color 0.15s;
+  margin: 2px 0;
+}
+
+.resize-handle:hover {
+  background-color: var(--bg-hover);
+}
+
+.resize-handle.dragging {
+  background-color: var(--accent-color);
+}
+
+.resize-line {
+  width: 40px;
+  height: 4px;
+  background-color: var(--border-color);
+  border-radius: 2px;
+  transition: background-color 0.15s;
+}
+
+.resize-handle:hover .resize-line {
+  background-color: var(--text-secondary);
+}
+
+.resize-handle.dragging .resize-line {
+  background-color: white;
+}
+
+/* ===== AI 助手樣式 ===== */
+
+/* AI 設定區塊 */
+.ai-settings {
+  background-color: var(--bg-primary);
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.ai-settings .form-group {
+  margin-bottom: 10px;
+}
+
+.ai-settings .form-group:last-of-type {
+  margin-bottom: 12px;
+}
+
+.ai-settings select {
+  width: 100%;
+  padding: 8px 10px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.ai-settings select:focus {
+  border-color: var(--accent-color);
+}
+
+.api-key-input {
+  display: flex;
+  gap: 6px;
+}
+
+.api-key-input input {
+  flex: 1;
+}
+
+.toggle-key-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.toggle-key-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+/* AI 對話區塊 */
+.ai-section {
+  padding-top: 8px;
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-content {
+  padding: 8px 0;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-content.collapsed {
+  display: none;
+}
+
+.toggle-section-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.2s;
+}
+
+.toggle-section-btn.collapsed {
+  transform: rotate(-90deg);
+}
+
+/* AI 快捷按鈕 */
+.ai-quick-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.ai-action-btn {
+  flex: 1;
+  padding: 8px 6px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ai-action-btn:hover {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+}
+
+.ai-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* AI 輸入區 */
+.ai-input-container {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+#aiInput {
+  flex: 1;
+  padding: 10px 12px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+}
+
+#aiInput:focus {
+  border-color: var(--accent-color);
+}
+
+.voice-btn, .send-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.voice-btn:hover, .send-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.send-btn {
+  background-color: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+.send-btn:hover {
+  opacity: 0.9;
+}
+
+/* 語音錄製動畫 */
+.voice-btn.recording {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* 語言選擇 */
+.ai-lang-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.ai-lang-select select {
+  padding: 4px 8px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 11px;
+  outline: none;
+}
+
+/* AI 回應區 */
+.ai-response {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  flex: 1;
+  min-height: 60px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ai-placeholder {
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 11px;
+}
+
+.ai-response.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-response.loading::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-error {
+  color: #ef4444;
+}
+
+.ai-result {
+  white-space: pre-wrap;
+  word-break: break-word;
 }

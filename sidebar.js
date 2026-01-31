@@ -6,8 +6,36 @@ let contextMenuTabId = null;
 let draggedTabId = null;
 let shortcuts = [];
 let settings = {
-  theme: 'blue'
+  theme: 'blue',
+  aiProvider: 'google',
+  aiModel: 'gemini-3-flash',
+  aiApiKey: ''
 };
+
+// AI 模型選項
+const aiModels = {
+  google: [
+    { id: 'gemini-3-flash', name: 'Gemini 3 Flash (快速)' },
+    { id: 'gemini-3-pro', name: 'Gemini 3 Pro (最強)' },
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' }
+  ],
+  openai: [
+    { id: 'gpt-5.2', name: 'GPT-5.2 (最新)' },
+    { id: 'gpt-5.2-pro', name: 'GPT-5.2 Pro (最強)' },
+    { id: 'gpt-5.1', name: 'GPT-5.1' }
+  ],
+  groq: [
+    { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B (推薦)' },
+    { id: 'qwen/qwen-3-32b', name: 'Qwen 3 32B' },
+    { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B (快速)' },
+    { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Llama 4 Scout (多模態)' }
+  ]
+};
+
+// 語音識別
+let recognition = null;
+let isRecording = false;
 
 // 預設快捷網站
 const defaultShortcuts = [
@@ -39,6 +67,22 @@ const helpPanel = document.getElementById('helpPanel');
 const closeHelpBtn = document.getElementById('closeHelpBtn');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
 
+// AI 相關 DOM 元素
+const aiProvider = document.getElementById('aiProvider');
+const aiModel = document.getElementById('aiModel');
+const aiApiKey = document.getElementById('aiApiKey');
+const toggleApiKey = document.getElementById('toggleApiKey');
+const saveAiSettings = document.getElementById('saveAiSettings');
+const toggleAiSection = document.getElementById('toggleAiSection');
+const aiContent = document.getElementById('aiContent');
+const aiInput = document.getElementById('aiInput');
+const voiceInputBtn = document.getElementById('voiceInputBtn');
+const sendAiBtn = document.getElementById('sendAiBtn');
+const voiceLang = document.getElementById('voiceLang');
+const aiResponse = document.getElementById('aiResponse');
+const resizeHandle = document.getElementById('resizeHandle');
+const normalTabs = document.getElementById('normalTabs');
+
 // 初始化
 async function init() {
   const window = await chrome.windows.getCurrent();
@@ -53,6 +97,9 @@ async function init() {
   setupShortcutListeners();
   setupHelpListeners();
   setupFullscreenListeners();
+  setupAiListeners();
+  setupSpeechRecognition();
+  setupResizeHandle();
 }
 
 // 載入所有分頁
@@ -493,6 +540,13 @@ async function loadSettings() {
       settings = { ...settings, ...data.settings };
     }
     applyTheme(settings.theme);
+    // 載入 AI 設定到 UI
+    if (aiProvider) {
+      aiProvider.value = settings.aiProvider || 'google';
+      updateModelOptions();
+      if (aiModel) aiModel.value = settings.aiModel || 'gemini-3-flash';
+      if (aiApiKey) aiApiKey.value = settings.aiApiKey || '';
+    }
   } catch (e) {
     console.error('載入設定失敗:', e);
   }
@@ -691,6 +745,443 @@ function setupShortcutListeners() {
       hideShortcutModal();
     }
   });
+}
+
+// ===== 可拖曳分隔線功能 =====
+
+function setupResizeHandle() {
+  if (!resizeHandle) return;
+
+  let isResizing = false;
+  let startY = 0;
+  let startHeight = 0;
+  const aiSection = document.getElementById('aiSection');
+  const container = document.querySelector('.container');
+
+  // 載入儲存的高度
+  loadAiSectionHeight();
+
+  resizeHandle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startY = e.clientY;
+    startHeight = aiSection.offsetHeight;
+    resizeHandle.classList.add('dragging');
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    const deltaY = startY - e.clientY;
+    const newHeight = Math.max(100, Math.min(startHeight + deltaY, window.innerHeight - 200));
+    aiSection.style.height = newHeight + 'px';
+    aiSection.style.minHeight = newHeight + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      resizeHandle.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      // 儲存高度
+      saveAiSectionHeight(aiSection.offsetHeight);
+    }
+  });
+
+  // 觸控支援
+  resizeHandle.addEventListener('touchstart', (e) => {
+    isResizing = true;
+    startY = e.touches[0].clientY;
+    startHeight = aiSection.offsetHeight;
+    resizeHandle.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isResizing) return;
+    const deltaY = startY - e.touches[0].clientY;
+    const newHeight = Math.max(100, Math.min(startHeight + deltaY, window.innerHeight - 200));
+    aiSection.style.height = newHeight + 'px';
+    aiSection.style.minHeight = newHeight + 'px';
+  });
+
+  document.addEventListener('touchend', () => {
+    if (isResizing) {
+      isResizing = false;
+      resizeHandle.classList.remove('dragging');
+      saveAiSectionHeight(aiSection.offsetHeight);
+    }
+  });
+}
+
+// 儲存 AI 區塊高度
+async function saveAiSectionHeight(height) {
+  try {
+    await chrome.storage.local.set({ aiSectionHeight: height });
+  } catch (e) {
+    console.error('儲存高度失敗:', e);
+  }
+}
+
+// 載入 AI 區塊高度
+async function loadAiSectionHeight() {
+  try {
+    const data = await chrome.storage.local.get('aiSectionHeight');
+    if (data.aiSectionHeight) {
+      const aiSection = document.getElementById('aiSection');
+      if (aiSection) {
+        aiSection.style.height = data.aiSectionHeight + 'px';
+        aiSection.style.minHeight = data.aiSectionHeight + 'px';
+      }
+    }
+  } catch (e) {
+    console.error('載入高度失敗:', e);
+  }
+}
+
+// ===== AI 助手功能 =====
+
+// 更新模型選項
+function updateModelOptions() {
+  if (!aiModel || !aiProvider) return;
+  const provider = aiProvider.value;
+  const models = aiModels[provider] || [];
+  aiModel.innerHTML = models.map(m =>
+    `<option value="${m.id}">${m.name}</option>`
+  ).join('');
+}
+
+// 設定 AI 事件監聽
+function setupAiListeners() {
+  // 服務切換時更新模型列表
+  if (aiProvider) {
+    aiProvider.addEventListener('change', () => {
+      updateModelOptions();
+      settings.aiProvider = aiProvider.value;
+      settings.aiModel = aiModel.value;
+    });
+  }
+
+  // 模型切換
+  if (aiModel) {
+    aiModel.addEventListener('change', () => {
+      settings.aiModel = aiModel.value;
+    });
+  }
+
+  // 顯示/隱藏 API Key
+  if (toggleApiKey) {
+    toggleApiKey.addEventListener('click', () => {
+      aiApiKey.type = aiApiKey.type === 'password' ? 'text' : 'password';
+    });
+  }
+
+  // 儲存 AI 設定
+  if (saveAiSettings) {
+    saveAiSettings.addEventListener('click', async () => {
+      settings.aiProvider = aiProvider.value;
+      settings.aiModel = aiModel.value;
+      settings.aiApiKey = aiApiKey.value;
+      await saveSettings();
+      // 視覺反饋
+      const originalText = saveAiSettings.textContent;
+      saveAiSettings.textContent = '✅ 已儲存！';
+      saveAiSettings.style.backgroundColor = '#22c55e';
+      setTimeout(() => {
+        saveAiSettings.textContent = originalText;
+        saveAiSettings.style.backgroundColor = '';
+      }, 1500);
+    });
+  }
+
+  // 展開/收合 AI 區塊
+  if (toggleAiSection) {
+    toggleAiSection.addEventListener('click', () => {
+      aiContent.classList.toggle('collapsed');
+      toggleAiSection.classList.toggle('collapsed');
+    });
+  }
+
+  // 快捷按鈕
+  document.querySelectorAll('.ai-action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      handleQuickAction(btn.dataset.action);
+    });
+  });
+
+  // 發送按鈕
+  if (sendAiBtn) {
+    sendAiBtn.addEventListener('click', () => {
+      sendAiQuery(aiInput.value);
+    });
+  }
+
+  // Enter 發送
+  if (aiInput) {
+    aiInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAiQuery(aiInput.value);
+      }
+    });
+  }
+
+  // 語音按鈕
+  if (voiceInputBtn) {
+    voiceInputBtn.addEventListener('click', toggleVoiceInput);
+  }
+}
+
+// 設定語音識別
+function setupSpeechRecognition() {
+  if (!('webkitSpeechRecognition' in window)) {
+    console.log('此瀏覽器不支援語音識別');
+    if (voiceInputBtn) voiceInputBtn.style.display = 'none';
+    return;
+  }
+
+  recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    voiceInputBtn.classList.add('recording');
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    voiceInputBtn.classList.remove('recording');
+  };
+
+  recognition.onresult = (event) => {
+    let finalTranscript = '';
+    let interimTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += transcript;
+      } else {
+        interimTranscript += transcript;
+      }
+    }
+
+    aiInput.value = finalTranscript || interimTranscript;
+  };
+
+  recognition.onerror = (event) => {
+    console.error('語音識別錯誤:', event.error);
+    isRecording = false;
+    voiceInputBtn.classList.remove('recording');
+
+    if (event.error === 'not-allowed') {
+      showAiMessage('❌ 請允許麥克風權限', true);
+    }
+  };
+}
+
+// 切換語音輸入
+async function toggleVoiceInput() {
+  if (!recognition) {
+    showAiMessage('❌ 此瀏覽器不支援語音識別', true);
+    return;
+  }
+
+  if (isRecording) {
+    recognition.stop();
+  } else {
+    // 先請求麥克風權限
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop()); // 釋放資源
+      recognition.lang = voiceLang.value;
+      recognition.start();
+    } catch (error) {
+      console.error('麥克風權限錯誤:', error);
+      if (error.name === 'NotAllowedError') {
+        showAiMessage('❌ 麥克風權限被拒絕，請在瀏覽器設定中允許', true);
+      } else if (error.name === 'NotFoundError') {
+        showAiMessage('❌ 找不到麥克風裝置', true);
+      } else {
+        showAiMessage('❌ 無法啟用語音輸入: ' + error.message, true);
+      }
+    }
+  }
+}
+
+// 處理快捷動作
+async function handleQuickAction(action) {
+  const prompts = {
+    summary: '請幫我摘要以下網頁內容，用繁體中文回答，重點條列式呈現：',
+    conclusion: '請從以下網頁內容中提取主要結論和重點，用繁體中文回答：',
+    translate: '請將以下網頁內容翻譯成繁體中文，保持原意：'
+  };
+
+  const prompt = prompts[action];
+  if (prompt) {
+    await sendAiQuery(prompt, true);
+  }
+}
+
+// 發送 AI 查詢
+async function sendAiQuery(query, includePageContent = true) {
+  if (!query.trim()) {
+    showAiMessage('請輸入問題', true);
+    return;
+  }
+
+  if (!settings.aiApiKey) {
+    showAiMessage('❌ 請先在設定中輸入 API Key', true);
+    return;
+  }
+
+  // 顯示載入狀態
+  aiResponse.innerHTML = '';
+  aiResponse.classList.add('loading');
+  disableAiInputs(true);
+
+  try {
+    let pageContent = '';
+    if (includePageContent) {
+      pageContent = await getPageContent();
+      if (!pageContent) {
+        showAiMessage('❌ 無法取得頁面內容（系統頁面不支援）', true);
+        return;
+      }
+    }
+
+    const fullPrompt = includePageContent ? `${query}\n\n網頁內容：\n${pageContent}` : query;
+    const response = await callAI(fullPrompt);
+
+    showAiMessage(response);
+    aiInput.value = '';
+  } catch (error) {
+    console.error('AI 請求失敗:', error);
+    showAiMessage(`❌ ${error.message}`, true);
+  } finally {
+    aiResponse.classList.remove('loading');
+    disableAiInputs(false);
+  }
+}
+
+// 取得頁面內容
+async function getPageContent() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    // 檢查是否為系統頁面
+    if (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://') ||
+        tab.url.startsWith('chrome-extension://') || tab.url.startsWith('about:')) {
+      return null;
+    }
+
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        // 移除 script 和 style 標籤
+        const clone = document.body.cloneNode(true);
+        clone.querySelectorAll('script, style, noscript').forEach(el => el.remove());
+        return clone.innerText.substring(0, 15000); // 限制長度
+      }
+    });
+
+    return results[0]?.result || '';
+  } catch (error) {
+    console.error('取得頁面內容失敗:', error);
+    return null;
+  }
+}
+
+// 呼叫 AI API
+async function callAI(prompt) {
+  const provider = settings.aiProvider;
+  const model = settings.aiModel;
+  const apiKey = settings.aiApiKey;
+
+  let url, headers, body;
+
+  switch (provider) {
+    case 'google':
+      url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      headers = { 'Content-Type': 'application/json' };
+      body = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 }
+      };
+      break;
+
+    case 'openai':
+      url = 'https://api.openai.com/v1/chat/completions';
+      headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      };
+      body = {
+        model: model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 2048
+      };
+      break;
+
+    case 'groq':
+      url = 'https://api.groq.com/openai/v1/chat/completions';
+      headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      };
+      body = {
+        model: model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.6,
+        max_tokens: 2048
+      };
+      break;
+
+    default:
+      throw new Error('不支援的 AI 服務');
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error?.message || `API 錯誤 (${response.status})`);
+  }
+
+  const data = await response.json();
+
+  // 解析回應
+  switch (provider) {
+    case 'google':
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || '無回應';
+    case 'openai':
+    case 'groq':
+      return data.choices?.[0]?.message?.content || '無回應';
+    default:
+      return '無回應';
+  }
+}
+
+// 顯示 AI 訊息
+function showAiMessage(message, isError = false) {
+  aiResponse.classList.remove('loading');
+  aiResponse.innerHTML = `<div class="${isError ? 'ai-error' : 'ai-result'}">${escapeHtml(message)}</div>`;
+}
+
+// 禁用/啟用 AI 輸入
+function disableAiInputs(disabled) {
+  document.querySelectorAll('.ai-action-btn').forEach(btn => btn.disabled = disabled);
+  if (aiInput) aiInput.disabled = disabled;
+  if (sendAiBtn) sendAiBtn.disabled = disabled;
+  if (voiceInputBtn) voiceInputBtn.disabled = disabled;
 }
 
 // 啟動
